@@ -10,7 +10,7 @@ router.get('/', restrict, function(req, res, next) {
 	// get the top 5 results based on viewcount
 	db.kb.find({kb_published:'true'}).sort({kb_viewcount: -1}).limit(config.settings.num_top_results).exec(function (err, top_results) {
  		res.render('index', { 
-			 title: 'openKB', 
+			 title: config.settings.website_title, 
 			 "top_results": top_results, 
 			 session: req.session,
 			 message: clear_session_value(req.session, "message"),
