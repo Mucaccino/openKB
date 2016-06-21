@@ -41,8 +41,10 @@ router.post('/protected/action', function(req, res) {
 router.get('/kb/:id', restrict, function(req, res) {
 	var db = req.db;
 	var classy = require("markdown-it-classy");
+	var taskLists = require("markdown-it-task-lists");
 	var markdownit = req.markdownit;
 	markdownit.use(classy);
+	markdownit.use(taskLists);
 	var helpers = req.handlebars.helpers;
 	var config = require('./config');
   
