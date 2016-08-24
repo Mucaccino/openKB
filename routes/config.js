@@ -3,7 +3,7 @@ var config = {};
 config.settings = {};
 
 // sets the number of results shown on the home page
-config.settings.num_top_results = 10;
+config.settings.num_top_results = 20;
 
 // sets the global date formatting. Uses moment.js date formatting, see more here: http://momentjs.com/docs/#/displaying/
 config.settings.date_format = 'DD/MM/YYYY h:mmA';
