@@ -4,8 +4,8 @@ $(document).ready(function(){
         $(this).addClass('img-responsive');
     });
 
-    // make all links in articles open in new window/tab
-    $('.body_text a').attr('target', '_blank');
+    // make all links in articles open in new window/tab (not to toc links)
+    $('.body_text a').not('.table-of-contents a').attr('target', '_blank');
 
 	// setup mermaid charting
 	mermaid.initialize({startOnLoad: true});
