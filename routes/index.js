@@ -45,6 +45,14 @@ router.get('/kb/:id', restrict, function(req, res) {
 	var markdownit = req.markdownit;
 	markdownit.use(classy);
 	markdownit.use(taskLists);
+	markdownit.use(require("markdown-it-anchor"), {
+	  callback: function(token, info) {
+        //console.log('token.type: ' + token.type)
+      }
+    });
+	markdownit.use(require("markdown-it-table-of-contents"), {
+      includeLevel:[1,2,3]
+	});
 	var helpers = req.handlebars.helpers;
 	var config = require('./config');
   
