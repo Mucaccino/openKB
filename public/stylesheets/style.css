@@ -19,6 +19,26 @@
     #frm_edit_kb_save, #frm_kb_published{
         float:right;
     }
+
+    .permalink_buttons{
+        padding-top: 15px;
+    }
+
+    .input-lg {
+        height: 50px;
+        padding-left: 15px;
+        font-size: 16px;
+        line-height: 1.2;
+        border-radius: 3px;
+    }
+
+    .btn-lg, .btn-group-lg>.btn {
+        height: 50px;
+        padding-left: 0px 5px;
+        font-size: 16px;
+        line-height: .8;
+        border-radius: 3px;
+    }
 }
 
 html, body {
@@ -30,6 +50,10 @@ html{
     min-height: 100%;
 }
 
+.hljs{
+    background: transparent;
+}
+
 #header {        
     height: 50px;
 }
@@ -38,13 +62,30 @@ html{
     font-size: 14px;
 }
 
-#editor, #preview {
-    height: calc(100vh - 135px - 175px);
+.CodeMirror {
+    height: calc(100vh - 110px - 175px - 70px) !important;
     overflow: auto;
 }
 
-#editor-pagewrapper {
-    height: calc(100vh - 100px - 135px);
+.editor-toolbar, .CodeMirror{
+    border: 2px solid #dce4ec;
+    border-radius: 4px;
+}
+
+.editor-toolbar{
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+    border-bottom: 0px;
+}
+
+.CodeMirror{
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+}
+
+#preview {
+    height: calc(100vh - 110px - 195px);
+    overflow: auto;
 }
 
 .show_footer{
@@ -86,8 +127,8 @@ html{
 }
 
 .editor_btn_action{
-    border-top-left-radius: 4px !important; 
-    border-bottom-left-radius: 4px !important;
+    border-top-left-radius: 0px !important; 
+    border-bottom-left-radius: 0px !important;
 }
 
 .dropup-list{
@@ -121,6 +162,10 @@ html{
 .popover-title{
     background-color: #e74c3c;
     color: white;
+}
+
+.bg-danger, .bg-warning, .bg-primary, .bg-success, .bg-info{
+    color: #ffffff;
 }
 
 .footer {
