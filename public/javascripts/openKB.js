@@ -276,6 +276,7 @@ $(document).ready(function(){
         // add responsive images and tables
         var fixed_html = html.replace(/<img/g, "<img class='img-responsive' ");
         fixed_html = fixed_html.replace(/<table/g, "<table class='table table-hover' ");
+        fixed_html = fixed_html.replace(/\[\[toc\]\]/g, ""); // remove [[toc]] from edit preview
         $('#preview').html(fixed_html);
 
         // re-hightlight the preview
