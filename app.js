@@ -9,7 +9,6 @@ var session = require('express-session');
 var bcrypt = require('bcrypt-nodejs');
 var lunr = require('lunr');
 var markdownit = require('markdown-it')({html: true, linkify: true, typographer: true});
-var markdownitUseStore;
 var moment = require('moment');
 var fs = require('fs');
 var Nedb_store = require('nedb-session-store')(session);

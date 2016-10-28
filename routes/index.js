@@ -106,7 +106,6 @@ router.get('/kb/:id/version', common.restrict, function(req, res){
 	var anchor = require("markdown-it-anchor");
 	var tableOfContents = require("markdown-it-table-of-contents");
 	var markdownit = req.markdownit;
-	req.markdownitUseStore = {classy:classy, taskLists:taskLists, anchor:anchor, tableOfContents:tableOfContents};
 	markdownit.use(classy);
 	markdownit.use(taskLists);
 	markdownit.use(anchor);
@@ -158,7 +157,6 @@ router.get('/kb/:id', common.restrict, function(req, res){
 	var anchor = require("markdown-it-anchor");
 	var tableOfContents = require("markdown-it-table-of-contents");
 	var markdownit = req.markdownit;
-	req.markdownitUseStore = {classy:classy, taskLists:taskLists, anchor:anchor, tableOfContents:tableOfContents};
 	markdownit.use(classy);
 	markdownit.use(taskLists);
 	markdownit.use(anchor);
