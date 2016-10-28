@@ -154,8 +154,17 @@ router.get('/kb/:id', common.restrict, function(req, res){
     var db = req.app.db;
     common.config_expose(req.app);
 	var classy = require('../public/javascripts/markdown-it-classy');
+	var taskLists = require("markdown-it-task-lists");
+	var anchor = require("markdown-it-anchor");
+	var tableOfContents = require("markdown-it-table-of-contents");
 	var markdownit = req.markdownit;
+	req.markdownitUseStore = {classy:classy, taskLists:taskLists, anchor:anchor, tableOfContents:tableOfContents};
 	markdownit.use(classy);
+	markdownit.use(taskLists);
+	markdownit.use(anchor);
+	markdownit.use(tableOfContents, {
+      includeLevel:[1,2,3]
+	});
 
     var featuredCount = config.settings.featured_articles_count ? config.settings.featured_articles_count : 4;
 

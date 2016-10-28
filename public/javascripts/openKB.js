@@ -6,7 +6,7 @@ $(document).ready(function(){
 
     // make all links in articles open in new window/tab (not to toc links)
     if(config.links_blank_page === true){
-        $('.body_text a').attr('target', '_blank');
+        $('.body_text a').not('.table-of-contents a').attr('target', '_blank');
     }
 
 	// setup mermaid charting
