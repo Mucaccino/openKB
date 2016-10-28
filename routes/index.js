@@ -46,15 +46,14 @@ router.post('/protected/action', function(req, res){
 router.get('/kb/:id', restrict, function(req, res){
 	var classy = require('../public/javascripts/markdown-it-classy');
 	var taskLists = require("markdown-it-task-lists");
+	var anchor = require("markdown-it-anchor");
+	var tableOfContents = require("markdown-it-table-of-contents");
 	var markdownit = req.markdownit;
+	req.markdownitUseStore = {classy:classy, taskLists:taskLists, anchor:anchor, tableOfContents:tableOfContents};
 	markdownit.use(classy);
 	markdownit.use(taskLists);
-	markdownit.use(require("markdown-it-anchor"), {
-	  callback: function(token, info) {
-        //console.log('token.type: ' + token.type)
-      }
-    });
-	markdownit.use(require("markdown-it-table-of-contents"), {
+	markdownit.use(anchor);
+	markdownit.use(tableOfContents, {
       includeLevel:[1,2,3]
 	});
 	var config = require('./config');

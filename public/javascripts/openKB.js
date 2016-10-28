@@ -27,7 +27,28 @@ $(document).ready(function(){
         // setup editors
         var simplemde = new SimpleMDE({
             element: $('#editor')[0],
-            toolbar: ['bold', 'italic', 'heading', '|', 'quote', 'unordered-list', 'ordered-list', '|', 'link', 'image', '|', 'table', 'horizontal-rule', 'code', 'guide']
+            toolbar: ['bold', 'italic', 'heading', '|', 'quote', 'unordered-list', 'ordered-list', '|', 'link', 'image', '|', 'table', 'horizontal-rule',
+            'code', '|', {
+                name: "table-of-contents",
+                action: function customFunction(editor){
+                    var cm = editor.codemirror;
+                    var text = cm.getSelection();
+                    var startEnd = ["[[toc]]", ""];
+                    var start = startEnd[0];
+                    var end = startEnd[1];
+                    var startPoint = cm.getCursor("start");
+                    var endPoint = cm.getCursor("end");
+                    cm.replaceSelection(start + text + end);
+                    startPoint.ch += start.length;
+                    if(startPoint !== endPoint) {
+                        endPoint.ch += start.length;
+                    }
+                    cm.setSelection(startPoint, endPoint);
+                    cm.focus();
+                },
+                className: "fa fa-list-alt",
+                title: "Table Of Contents",
+            }, 'guide']
         });
 
         // setup inline attachments
