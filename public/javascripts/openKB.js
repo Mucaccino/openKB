@@ -1,32 +1,116 @@
 $(document).ready(function(){
 	// add the responsive image class to all images
-    $('img').each(function(){
+    $('.body_text img').each(function(){
         $(this).addClass('img-responsive');
     });
 
     // make all links in articles open in new window/tab (not to toc links)
-    $('.body_text a').not('.table-of-contents a').attr('target', '_blank');
+    if(config.links_blank_page === true){
+        $('.body_text a').attr('target', '_blank');
+    }
 
 	// setup mermaid charting
-	mermaid.initialize({startOnLoad: true});
+    if(typeof mermaid !== 'undefined'){
+        mermaid.initialize({startOnLoad: true});
+    }
 
 	// add the table class to all tables
     $('table').each(function(){
         $(this).addClass('table table-hover');
     });
 
+    // When the version dropdown changes
+    $(document).on('change', '#kb_versions', function(){
+        // get the article from the API
+        $.ajax({
+            method: 'POST',
+            url: $('#app_context').val() + '/api/getArticleJson',
+            data: {kb_id: $(this).val()}
+        })
+        .done(function(article){
+            $('#frm_kb_title').val(article.kb_title);
+            simplemde.value(article.kb_body);
+            $('#btnSettingsMenu').trigger('click');
+        })
+        .fail(function(msg){
+            show_notification(msg.responseText, 'danger');
+        });
+    });
+
+    // hookup the typeahead search
+    if(config.typeahead_search === true){
+        // on pages which have the search form
+        if($('#frm_search').length){
+            // grab the index from server
+            $.ajax({
+                method: 'POST',
+                url: $('#app_context').val() + '/search_api',
+                data: {id: this.id, state: this.checked}
+            })
+            .done(function(response){
+                var index = lunr.Index.load(response.index);
+                var store = response.store;
+
+                $('#frm_search').on('keyup', function(){
+                    var query = $(this).val();
+                    var results = index.search(query);
+                    if(results.length === 0){
+                        $('#searchResult').addClass('hidden');
+                    }else{
+                        $('.searchResultList').empty();
+                        $('.searchResultList').append('<li class="list-group-item list-group-heading">Search results</li>');
+                        for(var result in results){
+                            var ref = results[result].ref;
+                            var searchitem = '<li class="list-group-item"><a href="/kb/' + store[ref].p + '">' + store[ref].t + '</a></li>';
+                            $('.searchResultList').append(searchitem);
+                        }
+                        $('#searchResult').removeClass('hidden');
+                    }
+                });
+            })
+            .fail(function(msg){
+                show_notification(msg.responseText, 'danger');
+            });
+        }
+    }
+
+    // setup the push menu
+    if($('.toggle-menu').length){
+        $('.toggle-menu').jPushMenu({closeOnClickOutside: false});
+    }
+
     // highlight any code blocks
     $('pre code').each(function(i, block){
         hljs.highlightBlock(block);
     });
 
+    // add the table class to all tables
+    if(config.add_header_anchors === true){
+        $('.body_text > h1, .body_text > h2, .body_text > h3, .body_text > h4, .body_text > h5').each(function(){
+            $(this).attr('id', convertToSlug($(this).text()));
+            $(this).prepend('<a class="headerAnchor" href="#' + convertToSlug($(this).text()) + '">#</a> ');
+        });
+    }
+
+    // scroll to hash point
+    if(window.location.hash){
+        // if element is found, scroll to it
+        if($(window.location.hash).length){
+            var element = $(window.location.hash);
+            $(window).scrollTop(element.offset().top).scrollLeft(element.offset().left);
+        }
+    }
+
 	// add the token field to the keywords input
-	$('#frm_kb_keywords').tokenfield();
+    if($('#frm_kb_keywords').length){
+        $('#frm_kb_keywords').tokenfield();
+    }
 
     if($('#editor').length){
         // setup editors
         var simplemde = new SimpleMDE({
             element: $('#editor')[0],
+            spellChecker: config.enable_spellchecker,
             toolbar: ['bold', 'italic', 'heading', '|', 'quote', 'unordered-list', 'ordered-list', '|', 'link', 'image', '|', 'table', 'horizontal-rule',
             'code', '|', {
                 name: "table-of-contents",
@@ -95,6 +179,65 @@ $(document).ready(function(){
         }
     }
 
+    // Editor save button clicked
+    $(document).on('click', '#frm_edit_kb_save', function(e){
+        e.preventDefault();
+
+        if($('#versionSidebar').length){
+            // only save if a version is edited
+            if($('#frm_kb_edit_reason').val() === ''){
+                show_notification('Please enter a reason for editing article', 'danger');
+                $('#btnVersionMenu').trigger('click');
+                $('#frm_kb_edit_reason').focus();
+            }else{
+                $('#edit_form').submit();
+            }
+        }else{
+            $('#edit_form').submit();
+        }
+    });
+
+    // Version edit button clicked
+    $(document).on('click', '.btnEditVersion', function(e){
+        $('#btnVersionMenu').trigger('click');
+        $.LoadingOverlay('show', {zIndex: 9999});
+        $.ajax({
+			method: 'POST',
+            url: $('#app_context').val() + '/api/getArticleJson',
+			data: {kb_id: $(this).parent().attr('id')}
+		})
+		.done(function(article){
+            $.LoadingOverlay('hide');
+            // populate data from fetched article
+            $('#frm_kb_title').val(article.kb_title);
+            simplemde.value(article.kb_body);
+        })
+        .fail(function(msg){
+            $.LoadingOverlay('hide');
+            show_notification(msg, 'danger');
+        });
+    });
+
+    // Version delete button clicked
+    $(document).on('click', '.btnDeleteVersion', function(e){
+        var groupElement = $(this).closest('.versionWrapper');
+        $('#btnVersionMenu').trigger('click');
+        $.ajax({
+			method: 'POST',
+            url: $('#app_context').val() + '/api/deleteVersion',
+			data: {kb_id: $(this).parent().attr('id')}
+		})
+		.done(function(article){
+            // remove the version elements from DOM
+            groupElement.remove();
+            show_notification('Version removed successfully', 'success');
+        })
+        .fail(function(msg){
+            show_notification(JSON.parse(msg.responseText).message, 'danger');
+        });
+    });
+
+
     // if in the editor, trap ctrl+s and cmd+s shortcuts and save the article
     if($('#frm_editor').val() === 'true'){
         $(window).bind('keydown', function(event){
@@ -111,7 +254,7 @@ $(document).ready(function(){
 	$("input[class='published_state']").change(function(){
 		$.ajax({
 			method: 'POST',
-			url: '/published_state',
+			url: $('#app_context').val() + '/published_state',
 			data: {id: this.id, state: this.checked}
 		})
 		.done(function(msg){
@@ -141,12 +284,42 @@ $(document).ready(function(){
         });
     }
 
+    // user up vote clicked
+    $(document).on('click', '#btnUpvote', function(){
+        $.ajax({
+            method: 'POST',
+            url: $('#app_context').val() + '/vote',
+            data: {'doc_id': $('#doc_id').val(), 'vote_type': 'upvote'}
+        })
+        .done(function(msg){
+            show_notification(msg, 'success', true);
+        })
+        .fail(function(msg){
+            show_notification(msg.responseText, 'danger');
+        });
+    });
+
+    // user down vote clicked
+    $(document).on('click', '#btnDownvote', function(){
+        $.ajax({
+            method: 'POST',
+            url: $('#app_context').val() + '/vote',
+            data: {'doc_id': $('#doc_id').val(), 'vote_type': 'downvote'}
+        })
+        .done(function(msg){
+            show_notification(msg, 'success', true);
+        })
+        .fail(function(msg){
+            show_notification(msg.responseText, 'danger');
+        });
+    });
+
 	// Call to API to check if a permalink is available
 	$('#validate_permalink').click(function(){
 		if($('#frm_kb_permalink').val() !== ''){
 			$.ajax({
 				method: 'POST',
-				url: '/api/validate_permalink',
+				url: $('#app_context').val() + '/api/validate_permalink',
 				data: {'permalink': $('#frm_kb_permalink').val(), 'doc_id': $('#frm_kb_id').val()}
 			})
 			.done(function(msg){
@@ -170,12 +343,12 @@ $(document).ready(function(){
 
 	// applies an article filter
 	$('#btn_articles_filter').click(function(){
-		window.location.href = '/articles/' + $('#article_filter').val();
+		window.location.href = $('#app_context').val() + '/articles/' + $('#article_filter').val();
 	});
 
 	// resets the article filter
 	$('#btn_articles_reset').click(function(){
-		window.location.href = '/articles';
+		window.location.href = $('#app_context').val() + '/articles';
 	});
 
 	// search button click event
@@ -205,7 +378,7 @@ function file_delete_confirm(img, id){
 	if(window.confirm('Are you sure you want to delete the file?')){
 		$.ajax({
 			method: 'POST',
-			url: '/file/delete',
+			url: $('#app_context').val() + '/file/delete',
 			data: {img: img}
 		})
 		.done(function(msg){
@@ -235,4 +408,11 @@ function show_notification(msg, type, reload_page){
 
 function search_form(id){
 	$('form#' + id).submit();
+}
+
+function convertToSlug(text){
+    return text
+        .toLowerCase()
+        .replace(/ /g, '-')
+        .replace(/[^\w-]+/g, '');
 }

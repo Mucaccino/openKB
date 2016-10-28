@@ -1,10 +1,13 @@
 node_modules/
 data/users.db
 data/sessions.db
-Rubbish/
 data/kb.db
+data/votes.db
+Rubbish/
 public/images/
 public/uploads/
 data/export.zip
 iisnode/
 web.config
+.vscode
+jsconfig.json
